@@ -1,0 +1,41 @@
+name: Build MonkeyDS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install devkitPro
+        run: |
+          brew update
+          brew install devkitpro/devkitpro/devkitarm
+          brew install devkitpro/devkitpro/libctru
+          brew install devkitpro/devkitpro/citro3d
+          brew install devkitpro/devkitpro/citro2d
+
+      - name: Build ELF
+        run: |
+          mkdir build
+
+          arm-none-eabi-gcc \
+          source/main.c \
+          source/player.c \
+          source/enemy.c \
+          -o build/MonkeyDS.elf \
+          -lctru \
+          -lcitro2d \
+          -lcitro3d
+
+      - name: Upload ELF
+        uses: actions/upload-artifact@v4
+        with:
+          name: MonkeyDS
+          path: build/MonkeyDS.elf
